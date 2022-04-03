@@ -182,7 +182,11 @@ def buy_menu_(message):
         location = DataBase.get_location_user(message.chat.id)
         markup = types.ReplyKeyboardMarkup(one_time_keyboard= True,resize_keyboard=True)
         list_products = DataBase.get_products_category_location(message.text, location)
-        markup.add(conf.buttons['back'], conf.buttons['menu'], row_width=2)
+        with bot.retrieve_data(message.chat.id) as data:
+            if (data['order'] is not None):
+                markup.add(conf.buttons['back'], conf.buttons['end_buy'], row_width=2)
+            else:
+                markup.add(conf.buttons['back'], conf.buttons['menu'], row_width=2)
         with bot.retrieve_data(message.chat.id) as data:
             data['category'] = message.text
         for row in list_products:
