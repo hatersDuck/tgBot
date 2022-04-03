@@ -443,7 +443,7 @@ def order_info(message):
         msg+= "Не указан"
     else:
         msg += temp
-    msg += "Никнейм: " + DataBase.get_username_client(int(id_client))
+    msg += "\nНикнейм: " + DataBase.get_username_client(int(id_client))
     msg += "\nРепутация: "
     temp = DataBase.get_count_orders_client(id_client)
     for row in temp:
@@ -488,7 +488,6 @@ def order_cancel(message):
 def order_complere(message):
     temp = DataBase.client_add_bonusese(int(message.text))
     send_message_user(temp[0], conf.botMessage['complete_order']%(temp[1]))
-    DataBase.increase_order(DataBase.get_id_user(int(message.text)))
     DataBase.complete_order(int(message.text))
     conf.id_client = temp[0]
     bot.set_state(message.from_user.id, adminStates.order_bonus)
@@ -775,7 +774,8 @@ def id_order_print(message):
 
 def id_prod_print(message):
     markup_reply = types.ReplyKeyboardMarkup(one_time_keyboard=True,resize_keyboard = True)
-    list_active_prod = DataBase.get_product(DataBase.get_location_user(message.from_user.id))
+    list_active_prod = DataBase.get_all_location_products(DataBase.get_location_user(message.from_user.id))
+    
     for row in list_active_prod:
         if (row[0] is None and row[1] is None):
             break
