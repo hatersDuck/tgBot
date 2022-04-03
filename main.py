@@ -763,7 +763,6 @@ def send_message_user(id, msg):
 def id_order_print(message):
     markup_reply = types.ReplyKeyboardMarkup(one_time_keyboard=True,resize_keyboard = True)
     list_active_orders = DataBase.get_active_orders(DataBase.get_location_user(message.from_user.id))
-    msg = ""
     for row in list_active_orders:
         if (row[0] is None and row[1] is None):
             break
@@ -774,7 +773,6 @@ def id_order_print(message):
 def id_prod_print(message):
     markup_reply = types.ReplyKeyboardMarkup(one_time_keyboard=True,resize_keyboard = True)
     list_active_prod = DataBase.get_product(DataBase.get_location_user(message.from_user.id))
-    msg = ""
     for row in list_active_prod:
         if (row[0] is None and row[1] is None):
             break
