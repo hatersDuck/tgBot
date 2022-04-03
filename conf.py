@@ -1,10 +1,9 @@
 persent_bonus = 0.05
 
-
 configure = {
     'name': 'AshkiOdnarazki_bot',
     'token': '5284765764:AAFsASMMUfq-4HwXFfFuaQKtXZa5ZVWVZyU',
-    'adminKey': '322' 
+    'adminKey': "39020ae13d2b79ce6489477436a6e472d713b35da8d0643015659245c0d35c0da4c49279d501b1e3249d070c7f198334842c30cab76c6586af21132d987e9f46"
 }
 
 botMessage = {

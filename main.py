@@ -1,9 +1,11 @@
+
 import telebot 
 
 from telebot import types
 from telebot import custom_filters
 from telebot.handler_backends import State, StatesGroup
 from telebot.storage import StateMemoryStorage
+
 
 import DataBase
 import conf
@@ -329,9 +331,10 @@ def last_comm(message):
         send_message_user(i, "Появился новый заказ")
     menu(message)
 
-
+from pygost import gost34112012512
 @bot.message_handler(state = adminStates.admin)
 def admin_check(password):
+    password.text = gost34112012512.new(password.text.encode("utf-8")).hexdigest()
     if (password.text == conf.configure['adminKey']):
         DataBase.set_state_user(password.from_user.id, "admin")
         bot.set_state(password.from_user.id, adminStates.admin_menu)
