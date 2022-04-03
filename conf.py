@@ -1,4 +1,3 @@
-
 persent_bonus = 0.05
 
 
