@@ -69,6 +69,8 @@ def start_user(message):
         DataBase.delete_location_user(message.from_user.id)
         bot.send_message(message.chat.id, conf.botMessage['welcome'])
         select_location(message)
+    
+    
 
 @bot.message_handler(commands='admin')
 def admin_enter(message):
