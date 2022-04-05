@@ -61,13 +61,13 @@ class adminStates(StatesGroup):
 @bot.message_handler(commands=['start'])
 def start_user(message):
     id_user = message.from_user.id
-    if (DataBase.new_user(id_user)):
-        DataBase.add_new_Client(id_user, message.from_user.username)
-    DataBase.delete_location_user(message.from_user.id)
-    bot.send_message(message.chat.id, conf.botMessage['welcome'])
     if (message.from_user.username is None):
         bot.send_message(message.from_user.id, conf.botMessage['error_start'])
     else:
+        if (DataBase.new_user(id_user)):
+            DataBase.add_new_Client(id_user, message.from_user.username)
+        DataBase.delete_location_user(message.from_user.id)
+        bot.send_message(message.chat.id, conf.botMessage['welcome'])
         select_location(message)
 
 @bot.message_handler(commands='admin')
