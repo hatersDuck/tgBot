@@ -304,6 +304,7 @@ def check_num(id:int):
             return False
 
 
+
 #raffle
 
 def get_ticket(first_name):

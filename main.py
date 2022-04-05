@@ -298,13 +298,16 @@ def add_new_order(message):
 @bot.message_handler(state = MyStates.new_num_name)
 def num_name(message):
     markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard= True)
-    markup.add(conf.buttons['no'])
+    if (DataBase.check_num(message.from_user.id)):
+        markup.add(conf.buttons['no'])
+    else:
+        markup.add(conf.buttons['yes'])
     bot.send_message(message.chat.id, conf.botMessage['num_name'], reply_markup=markup)
     bot.set_state(message.from_user.id, MyStates.commentariy)
 
 @bot.message_handler(state = MyStates.commentariy)
 def comm(message):
-    if (message.text != conf.buttons['no']):
+    if (message.text != conf.buttons['no'] or message.text != conf.buttons['yes']):
         DataBase.update_num_and_name(message.chat.id, message.text)
     markup = types.ReplyKeyboardMarkup(one_time_keyboard= True,resize_keyboard=True)
     markup.add(conf.buttons['no'])
