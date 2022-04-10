@@ -364,7 +364,7 @@ def admin_check(password):
 def admin_menu(message):
     markup_reply = types.ReplyKeyboardMarkup(resize_keyboard = True)
     markup_reply.add(conf.admin_button['prod'], conf.admin_button['order'], conf.admin_button['raffle'], conf.admin_button['loc_num'],conf.admin_button['report'],
-                    conf.admin_button['date'], conf.admin_button['spam'], conf.admin_button['prod_add_new_category'], row_width=2)
+                    conf.admin_button['date'], conf.admin_button['spam'], row_width=2)
     bot.send_message(message.chat.id, conf.admin['admin_menu'], reply_markup=markup_reply)
     bot.set_state(message.from_user.id, adminStates.admin_choice)
 
@@ -373,7 +373,8 @@ def prod_menu(msg):
     markup_reply = types.ReplyKeyboardMarkup(resize_keyboard = True)
     location = DataBase.get_location_user(msg.from_user.id)
     list_products = DataBase.get_all_location_products(location)
-    markup_reply.add(conf.admin_button['prod_add'],conf.admin_button['prod_delete'], conf.admin_button['prod_update_count'], conf.admin_button['prod_update_cost'], conf.admin_button['menu'], row_width=2)
+    markup_reply.add(conf.admin_button['prod_add'],conf.admin_button['prod_delete'], conf.admin_button['prod_add_new_category'],
+                    conf.admin_button['prod_update_count'], conf.admin_button['prod_update_cost'], conf.admin_button['menu'], row_width=2)
 
     message_bot = ""
     for row in list_products:
