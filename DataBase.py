@@ -47,6 +47,9 @@ def add_new_Product(name:str, count:int, type_prod:str, location:str, cost:int):
     sql.execute("INSERT INTO products VALUES(?, ?, ?, ?, ?, ?)", (max_id, name, count, type_prod, location, cost))
     db.commit()
 
+def add_new_category(location, category):
+    add_new_Product("Новая категория", 0, category, location, 0)
+
 def add_comm(id, comm):
     sql.execute("INSERT INTO order_comm VALUES(?, ?)", (id, comm))
     db.commit()
@@ -324,6 +327,9 @@ def add_new_ticket(last_name):
 
     sql.execute("INSERT INTO raffle VALUES(?, ?)", (last_name, max_id))
     db.commit()
+
+
+
 
 def check_ticket(last_name):
     temp = sql.execute("SELECT ticket FROM raffle WHERE user = ?", (last_name,)).fetchone()

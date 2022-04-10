@@ -43,6 +43,7 @@ class adminStates(StatesGroup):
     prod_upcount = State()
     prod_upcost = State()
     prod_delete = State()
+    prod_add_new_category = State()
 
     order_menu = State()
     order_info = State()
@@ -141,6 +142,8 @@ def order_info_client(message):
             else:
                 msg += conf.botMessage['info_order'] % (row[3], row[1], row[2]) 
                 msg += "\n"
+        if (msg == ""):
+            msg = conf.botMessage['empty_orders']
         bot.send_message(message.from_user.id, msg)
     bot.set_state(message.from_user.id, state=MyStates.choice_)
 
@@ -193,7 +196,7 @@ def buy_menu_(message):
         with bot.retrieve_data(message.chat.id) as data:
             data['category'] = message.text
         for row in list_products:
-            markup.add(conf.buttons['prod'] % (row[0], row[1], row[5]))
+            markup.add(conf.buttons['prod'] % (row[1], row[5], row[0]))
         bot.send_message(message.chat.id, conf.botMessage['product'], reply_markup= markup)
         bot.set_state(message.from_user.id, MyStates.buy_product)
 
@@ -211,11 +214,13 @@ def buy_product(message):
         num_name(message)
     else:
         id_product = ""
+        temp = False
         for char in message.text:
-            if (char == ':'):
-                break
-            else:
+            if (char == '[' or char == ']'):
+                temp = not temp
+            elif (temp):
                 id_product += char
+            
 
         markup = types.ReplyKeyboardMarkup(one_time_keyboard= True,resize_keyboard=True)
 
@@ -244,6 +249,7 @@ def buy_product(message):
         
         with bot.retrieve_data(message.chat.id) as data:
             data['id_prod'] = product[0]
+            data['counts'] = product[2]
             data['cost'] = product[5]
         
         bot.send_message(message.chat.id, conf.botMessage['count'], reply_markup=markup)
@@ -256,43 +262,49 @@ def add_new_order(message):
             message.text = data['category']
             bot.set_state(message.from_user.id, state=MyStates.buy_)
             buy_menu_(message)
-    count_ = ""
-    for char in message.text:
-            if (char == ' '):
-                break
-            else:
-                count_ += char
+    else:
+        count_ = ""
+        for char in message.text:
+                if (char == ' '):
+                    break
+                else:
+                    count_ += char
+            
+        with bot.retrieve_data(message.chat.id) as data:
+            temp = True
+            try:
+                count_ = int(count_)
+                if (count_ > data['counts']):
+                    a = int('s')
+            except ValueError:
+                bot.send_message(message.chat.id, conf.botMessage['error'])
+                message.text = data['id_order'] + ':'
+                bot.set_state(message.chat.id, state=MyStates.buy_product)
+                buy_product(message)
+                temp = False
+            if (temp):
+                if (data['order'] is None):
+                    data['id_order'] = DataBase.add_new_Order(
+                        data['id_prod'], 
+                        message.from_user.id,
+                        int(data['cost']) * count_, 
+                        DataBase.get_location_user(message.from_user.id), 
+                        count_)
+                    data['order'] = data['id_order']
+                else:
+                    DataBase.add_plus_Order(
+                        data['order'], 
+                        message.from_user.id,
+                        data['id_prod'],
+                        int(data['cost']) * count_,
+                        DataBase.get_location_user(message.from_user.id),
+                        count_)
+                DataBase.update_count_product(data['id_prod'], -1 * count_)
         
-    with bot.retrieve_data(message.chat.id) as data:
-        try:
-            count_ = int(count_)
-        except ValueError:
-            bot.send_message(message.chat.id, conf.botMessage['error'])
-            message.text = data['id_order'] + ':'
-            bot.set_state(message.chat.id, state=MyStates.buy_product)
-            buy_product(message)
-        if (data['order'] is None):
-            data['id_order'] = DataBase.add_new_Order(
-                data['id_prod'], 
-                message.from_user.id,
-                int(data['cost']) * count_, 
-                DataBase.get_location_user(message.from_user.id), 
-                count_)
-            data['order'] = data['id_order']
-        else:
-            DataBase.add_plus_Order(
-                data['order'], 
-                message.from_user.id,
-                data['id_prod'],
-                int(data['cost']) * count_,
-                DataBase.get_location_user(message.from_user.id),
-                count_)
-        DataBase.update_count_product(data['id_prod'], -1 * count_)
-    
-    markup = types.ReplyKeyboardMarkup(one_time_keyboard= True,resize_keyboard=True)
-    markup.add(conf.buttons['continue'], conf.buttons['end_buy'], row_width=2)
-    bot.send_message(message.chat.id, conf.botMessage['accept_order'], reply_markup=markup)
-    bot.set_state(message.chat.id, state=MyStates.choice_)
+        markup = types.ReplyKeyboardMarkup(one_time_keyboard= True,resize_keyboard=True)
+        markup.add(conf.buttons['continue'], conf.buttons['end_buy'], row_width=2)
+        bot.send_message(message.chat.id, conf.botMessage['accept_order'], reply_markup=markup)
+        bot.set_state(message.chat.id, state=MyStates.choice_)
     
     
     
@@ -351,7 +363,8 @@ def admin_check(password):
 @bot.message_handler(state = adminStates.admin_menu)
 def admin_menu(message):
     markup_reply = types.ReplyKeyboardMarkup(resize_keyboard = True)
-    markup_reply.add(conf.admin_button['prod'], conf.admin_button['order'], conf.admin_button['raffle'], conf.admin_button['loc_num'],conf.admin_button['report'],conf.admin_button['date'], conf.admin_button['spam'], row_width=2)
+    markup_reply.add(conf.admin_button['prod'], conf.admin_button['order'], conf.admin_button['raffle'], conf.admin_button['loc_num'],conf.admin_button['report'],
+                    conf.admin_button['date'], conf.admin_button['spam'], conf.admin_button['prod_add_new_category'], row_width=2)
     bot.send_message(message.chat.id, conf.admin['admin_menu'], reply_markup=markup_reply)
     bot.set_state(message.from_user.id, adminStates.admin_choice)
 
@@ -370,10 +383,14 @@ def prod_menu(msg):
 
 @bot.message_handler(state = adminStates.prod_ad_category)
 def prod_ad_category(message):
-    with bot.retrieve_data(message.chat.id) as data:
-        data['cat'] = message.text
-    bot.send_message(message.chat.id, conf.admin['prod_add'])
-    bot.set_state(message.from_user.id, adminStates.add_prod)
+    if (message.text == conf.buttons['back']):
+        bot.set_state(message.from_user.id, adminStates.admin_menu)
+        admin_menu(message)
+    else:
+        with bot.retrieve_data(message.chat.id) as data:
+            data['cat'] = message.text
+        bot.send_message(message.chat.id, conf.admin['prod_add'])
+        bot.set_state(message.from_user.id, adminStates.add_prod)
 
 
 @bot.message_handler(state = adminStates.add_prod)
@@ -428,6 +445,18 @@ def delete_prod(message):
         row = int(message.text)
         DataBase.delete_prod(row)
         bot.send_message(message.from_user.id, conf.admin['accept'], reply_markup=markup_reply)
+
+@bot.message_handler(state = adminStates.prod_add_new_category)
+def add_new_cat(message):
+    markup_reply = types.ReplyKeyboardMarkup(one_time_keyboard=True,resize_keyboard = True)
+    markup_reply.add(conf.buttons['back'])
+    if(message.text == conf.buttons['back']):
+        bot.set_state(message.from_user.id, adminStates.admin_menu)
+        admin_menu(message)
+    else:
+        DataBase.add_new_category(DataBase.get_location_user(message.chat.id), message.text)
+        bot.send_message(message.chat.id, "Принято", reply_markup=markup_reply)
+
 
 
 @bot.message_handler(state = adminStates.order_menu)
@@ -615,6 +644,12 @@ def get_admin(message):
     elif (message.text == conf.admin_button['prod_delete']):
         id_prod_print(message)
         bot.set_state(id, adminStates.prod_delete)
+
+    elif (message.text == conf.admin_button['prod_add_new_category']):
+        markup = types.ReplyKeyboardMarkup(resize_keyboard = True)
+        markup.add(conf.buttons['back'])
+        bot.send_message(id, "Введите новую категорию", reply_markup= markup)
+        bot.set_state(message.chat.id, adminStates.prod_add_new_category)
 
     elif (message.text == conf.admin_button['order']):
         bot.set_state(id, adminStates.order_menu)
@@ -805,7 +840,8 @@ def id_order_print(message):
 def id_prod_print(message):
     markup_reply = types.ReplyKeyboardMarkup(one_time_keyboard=True,resize_keyboard = True)
     list_active_prod = DataBase.get_all_location_products(DataBase.get_location_user(message.from_user.id))
-    
+    markup_reply.add(conf.buttons['back'])
+
     for row in list_active_prod:
         if (row[0] is None and row[1] is None):
             break

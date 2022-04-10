@@ -1,7 +1,7 @@
 persent_bonus = 0.05
-#редактировать картинку = media/intro.jpg
+
 configure = {
-    'token': '5179373973:AAEt5nTmx8K0I9-JAjKTvZ-XOgKcF_ZBeNM', #5284765764:AAFsASMMUfq-4HwXFfFuaQKtXZa5ZVWVZyU
+    'token': '5284765764:AAFsASMMUfq-4HwXFfFuaQKtXZa5ZVWVZyU', #5179373973:AAEt5nTmx8K0I9-JAjKTvZ-XOgKcF_ZBeNM
     'adminKey': "39020ae13d2b79ce6489477436a6e472d713b35da8d0643015659245c0d35c0da4c49279d501b1e3249d070c7f198334842c30cab76c6586af21132d987e9f46"
 }
 
@@ -33,6 +33,7 @@ botMessage = {
     'one_active_order': "У вас уже есть активный заказ!",
     'empty_products': "Товаров нет в наличие",
     'raffle_error': "Для того, чтобы участвовать в розыгрыше, выставите в настройках телеграма 'Имя пользователя'",
+    'empty_orders': "Вы ещё не совершили заказ",
 
     'order_date': "Доставка производится с ",
     'complete_order' : "Заказ выполнен! Вам начисленно %d бонусов",
@@ -57,7 +58,7 @@ buttons = {
     'yes': "Уже указано",
     #1 - id, 2 - name 3 - count 4-cost
     #Если захотие, удалить одну из %s то надо залезать в код
-    'prod': "%d: %s %d руб./шт.",
+    'prod': "%s %d руб./шт. [%d]",
     'order_info': "История заказов",
     'cancel_order': "Отменить заказ",
     'raffle_join': "Участвовать в розгрыше"
@@ -86,6 +87,7 @@ admin_button = {
     'prod_update_count': "Изменить количество",
     'prod_update_cost': "Изменить цену",
     'prod_delete': "Удалить",
+    'prod_add_new_category':"Добавить новую категорию",
 
     'order': "Заказы",
     'active_order': "Подробности заказа",
