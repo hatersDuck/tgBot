@@ -198,6 +198,9 @@ def get_products_category_location(category, location):
 def get_positive_category_in_location(location):
     return sql.execute("SELECT DISTINCT type FROM products WHERE location LIKE '" + location + "' AND count > 0").fetchall()
 
+def get_category_in_location(location):
+    return sql.execute("SELECT DISTINCT type FROM products WHERE location LIKE '" + location + "'").fetchall()
+
 def get_empty_category_in_location(location):
     return sql.execute("SELECT type FROM products WHERE count = 0 AND type != (SELECT type FROM products WHERE location LIKE '" + location + "' AND count > 0);")
 
@@ -296,7 +299,7 @@ def check_order(id:int):
     return False
 
 def check_num(id:int):
-    temp = sql.execute("SELECT num_name FROM products WHERE id = (?)", (id,)).fetchone()
+    temp = sql.execute("SELECT num_name FROM clients WHERE id = (?)", (id,)).fetchone()
     for row in temp:
         if row is None:
             return True

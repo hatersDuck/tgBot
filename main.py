@@ -36,7 +36,9 @@ class adminStates(StatesGroup):
     admin = State()
     admin_menu = State()
     admin_choice = State()
+    
     prod_ad = State()
+    prod_ad_category = State()
     add_prod = State()
     prod_upcount = State()
     prod_upcost = State()
@@ -55,9 +57,6 @@ class adminStates(StatesGroup):
     date = State()
     spam = State()
 
-
-
-
 @bot.message_handler(commands=['start'])
 def start_user(message):
     id_user = message.from_user.id
@@ -67,9 +66,9 @@ def start_user(message):
         if (DataBase.new_user(id_user)):
             DataBase.add_new_Client(id_user, message.from_user.username)
         DataBase.delete_location_user(message.from_user.id)
-        bot.send_message(message.chat.id, conf.botMessage['welcome'])
+        photo = open("media/intro.jpg", 'rb')
+        bot.send_photo(message.chat.id, photo, caption=conf.botMessage['welcome'])
         select_location(message)
-    
     
 
 @bot.message_handler(commands='admin')
@@ -369,6 +368,14 @@ def prod_menu(msg):
     bot.send_message(msg.chat.id, message_bot, reply_markup = markup_reply)
     bot.set_state(msg.from_user.id, adminStates.admin_choice)
 
+@bot.message_handler(state = adminStates.prod_ad_category)
+def prod_ad_category(message):
+    with bot.retrieve_data(message.chat.id) as data:
+        data['cat'] = message.text
+    bot.send_message(message.chat.id, conf.admin['prod_add'])
+    bot.set_state(message.from_user.id, adminStates.add_prod)
+
+
 @bot.message_handler(state = adminStates.add_prod)
 def add_new_prod(message):
     markup_reply = types.ReplyKeyboardMarkup(one_time_keyboard=True,resize_keyboard = True)
@@ -380,7 +387,8 @@ def add_new_prod(message):
     else:
         row = tranc(message.text)
         try:
-            DataBase.add_new_Product(row[0], int(row[1]), row[2], location, int(row[3]))
+            with bot.retrieve_data(message.chat.id) as data:
+                DataBase.add_new_Product(row[0], int(row[1]), data['cat'], location, int(row[2]))
             bot.send_message(message.from_user.id, conf.admin['accept'], reply_markup=markup_reply)
         except ValueError:
             bot.send_message(message.from_user.id, conf.botMessage['error'], reply_markup=markup_reply)
@@ -579,8 +587,25 @@ def get_admin(message):
         bot.set_state(id, adminStates.prod_ad)
         prod_menu(message)
     elif (message.text == conf.admin_button['prod_add']):
-        bot.send_message(id, conf.admin['prod_add'])
-        bot.set_state(id, adminStates.add_prod)
+        #Меня заставили!! Это стыдно НЕ ЧИТАЙТЕ
+        temp = [None,None]
+        list_category = DataBase.get_category_in_location(DataBase.get_location_user(message.from_user.id))
+        markup = types.ReplyKeyboardMarkup(resize_keyboard = True)
+        markup.add(conf.buttons['back'])
+        for row in enumerate(list_category):
+                if (row[0]%3 == 2):
+                    markup.add(temp[0], temp[1], row[1][0], row_width=3)
+                    temp[0] = None
+                    temp[1] = None
+                else:
+                    temp[row[0]%3] = row[1][0]
+        if (temp[1] is not None):
+            markup.add(temp[0], temp[1], row_width=2)
+        elif (temp[0] is not None):
+            markup.add(temp[0])
+
+        bot.send_message(id, "Выберите категорию", reply_markup= markup)
+        bot.set_state(id, adminStates.prod_ad_category)
     elif (message.text == conf.admin_button['prod_update_count']):
         bot.send_message(id, conf.admin['prod_update_count'])
         bot.set_state(id, adminStates.prod_upcount)
