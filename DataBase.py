@@ -1,7 +1,7 @@
 import sqlite3
 import conf
 
-db = sqlite3.connect('DataBase.db', check_same_thread = False)
+db = sqlite3.connect('DataBase.db', check_same_thread=False)
 sql = db.cursor()
 
 status = {
@@ -11,16 +11,16 @@ status = {
     3 : "Выполнен",
     4 : "Отклонён",
     5 : "Отменён",
-    'not_like' : "Обр%" # = 1-3 буквам 0-1 статусу
+    'not_like': "Обр%" # = 1-3 буквам 0-1 статусу
 }
 
 
 # add
 def add_new_Client(id:int, username:str):
-    if (username is None):
+    if username is None:
         username = "Empty"
     username = "@"+username
-    sql.execute("INSERT INTO clients(id, username) VALUES (?, ?)",(id, username))
+    sql.execute("INSERT INTO clients(id, username) VALUES (?, ?)", (id, username))
     db.commit()
 
 def add_new_Order(id_product,id_client:int, cost:int, location:str, counts:int): 
